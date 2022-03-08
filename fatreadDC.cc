@@ -27,7 +27,7 @@ using namespace std;
 
 NS_LOG_COMPONENT_DEFINE ("TcpVariantsComparison");
 
-
+//
 //static bool firstCwnd = true;
 //static bool firstSshThr = true;
 //static bool firstRtt = true;
@@ -37,15 +37,16 @@ static Ptr<OutputStreamWrapper> cWndStream;
 static Ptr<OutputStreamWrapper> rttStream;
 static Ptr<OutputStreamWrapper> rtoStream;
 static Ptr<OutputStreamWrapper> nextTxStream;
-static Ptr<OutputStreamWrapper> nextRxStream;
+//static Ptr<OutputStreamWrapper> nextRxStream;
 static Ptr<OutputStreamWrapper> inFlightStream;
 //static uint32_t cWndValue;
 //static uint32_t ssThreshValue;
 
 
 static const float THROUGHPUT = 100; //idk 
-/*
 //bunch of helper functions for tracing output
+
+/*    
 static void
 CwndTracer (uint32_t oldval, uint32_t newval)
 {
@@ -115,14 +116,13 @@ InFlightTracer (uint32_t old, uint32_t inFlight)
   NS_UNUSED (old);
   *inFlightStream->GetStream () << Simulator::Now ().GetSeconds () << " " << inFlight << std::endl;
 }
-
 static void
 NextRxTracer (SequenceNumber32 old, SequenceNumber32 nextRx)
 {
   NS_UNUSED (old);
   *nextRxStream->GetStream () << Simulator::Now ().GetSeconds () << " " << nextRx << std::endl;
 }
-
+*//*
 static void
 TraceCwnd (std::string cwnd_tr_file_name)
 {
@@ -170,16 +170,15 @@ TraceInFlight (std::string &in_flight_file_name)
   inFlightStream = ascii.CreateFileStream (in_flight_file_name.c_str ());
   Config::ConnectWithoutContext ("/NodeList/1/$ns3::TcpL4Protocol/SocketList/0/BytesInFlight", MakeCallback (&InFlightTracer));
 }
-
-
+*/
+/*
 static void
 TraceNextRx (std::string &next_rx_seq_file_name)
 {
   AsciiTraceHelper ascii;
   nextRxStream = ascii.CreateFileStream (next_rx_seq_file_name.c_str ());
-  Config::ConnectWithoutContext ("/NodeList/2/$ns3::TcpL4Protocol/SocketList/1/RxBuffer/NextRxSequence", MakeCallback (&NextRxTracer));
+ // Config::ConnectWithoutContext ("/NodeList/2/$ns3::TcpL4Protocol/SocketList/1/RxBuffer/NextRxSequence", MakeCallback (&NextRxTracer));
 }
-
 */
 
 
@@ -481,10 +480,10 @@ int main(int argc, char *argv[]){
 
 
 
-/*
 
 
   // Set up tracing if enabled
+  /*
   if (tracing)
     {
       std::ofstream ascii;
@@ -500,15 +499,15 @@ int main(int argc, char *argv[]){
       Simulator::Schedule (Seconds (0.00001), &TraceRto, prefix_file_name + "-rto.data");
       Simulator::Schedule (Seconds (0.00001), &TraceNextTx, prefix_file_name + "-next-tx.data");
       Simulator::Schedule (Seconds (0.00001), &TraceInFlight, prefix_file_name + "-inflight.data");
-      Simulator::Schedule (Seconds (0.1), &TraceNextRx, prefix_file_name + "-next-rx.data");
+    //  Simulator::Schedule (Seconds (0.1), &TraceNextRx, prefix_file_name + "-next-rx.data");
     }
-
+*//*
   if (pcap)
     {
         //UnReLink.EnablePcapAll (prefix_file_name, true);
       //LocalLink.EnablePcapAll (prefix_file_name, true);
-    }
-
+    }*/
+/*
   // Flow monitor
   FlowMonitorHelper flowHelper;
   if (flow_monitor)
