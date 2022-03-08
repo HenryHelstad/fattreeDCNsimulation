@@ -34,6 +34,10 @@
 #include <string>
 #include <iomanip>
  
+#include <stdio.h>
+#include <stdlib.h> 
+#include <time.h>
+ 
 #include "ns3/core-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/network-module.h"
@@ -144,6 +148,9 @@ int main (int argc, char *argv[])
   n5n1.Add(n1n2.Get (1));
   n5n1.Create (1);
   
+  srand(time(0));
+  SeedManager::SetSeed (rand());
+  SeedManager::SetRun (0);
   
   //random packet loss
   Ptr<ExponentialRandomVariable> uv = CreateObject<ExponentialRandomVariable> ();
@@ -151,7 +158,7 @@ int main (int argc, char *argv[])
   RateErrorModel error_model;
   error_model.SetRandomVariable (uv);
   error_model.SetUnit (RateErrorModel::ERROR_UNIT_PACKET);
-  error_model.SetRate (.5);
+  error_model.SetRate (.05);
  
  
   // We create the channels first without any IP addressing information
