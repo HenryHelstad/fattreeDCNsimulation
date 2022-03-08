@@ -82,7 +82,9 @@ static void
 CwndTracer (uint32_t oldval, uint32_t newval)
 {
   NS_LOG_INFO ("Moving cwnd from " << oldval << " to " << newval);
-  std::cout<<oldval << " " << newval <<std::endl;
+  std::cout<<"time: " <<Simulator::Now ().GetSeconds ();
+  std::cout<<" " <<oldval << " " << newval <<std::endl;
+  
 }
 
 /*static void
@@ -141,6 +143,16 @@ int main (int argc, char *argv[])
   NodeContainer n5n1;
   n5n1.Add(n1n2.Get (1));
   n5n1.Create (1);
+  
+  
+  //random packet loss
+  Ptr<ExponentialRandomVariable> uv = CreateObject<ExponentialRandomVariable> ();
+  uv->SetStream (50);
+  RateErrorModel error_model;
+  error_model.SetRandomVariable (uv);
+  error_model.SetUnit (RateErrorModel::ERROR_UNIT_PACKET);
+  error_model.SetRate (.5);
+ 
  
   // We create the channels first without any IP addressing information
   // First make and configure the helper, so that it will put the appropriate
@@ -148,6 +160,7 @@ int main (int argc, char *argv[])
   PointToPointHelper p2p;
   p2p.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (10000000)));
   p2p.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  p2p.SetDeviceAttribute ("ReceiveErrorModel", PointerValue (&error_model));
  
   // And then install devices and channels connecting our topology.
   NetDeviceContainer dev0 = p2p.Install (n0n1);
@@ -209,14 +222,14 @@ int main (int argc, char *argv[])
  
   ApplicationContainer apps = sink.Install (n2n3.Get (1));
   apps.Start (Seconds (0.0));
-  apps.Stop (Seconds (5.0));
+  apps.Stop (Seconds (10.0));
  
   ///////////////////////////////////////////////////////////
   PacketSinkHelper sink2 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort));
   ApplicationContainer apps2 = sink2.Install (n5n1.Get (1));
   apps2.Start (Seconds (0.0));
-  apps2.Stop (Seconds (5.0));                 
+  apps2.Stop (Seconds (10.0));                 
  
  
   // Create a source to send packets from n0.  Instead of a full Application
