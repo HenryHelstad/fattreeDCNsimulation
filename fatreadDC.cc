@@ -405,9 +405,6 @@ int main(int argc, char *argv[]){
   TrafficControlHelper tchPfifo;
   tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
 
-  TrafficControlHelper tchCoDel;
-  tchCoDel.SetRootQueueDisc ("ns3::CoDelQueueDisc");
-
 
 
     vector<NetDeviceContainer> devices;
@@ -419,6 +416,7 @@ int main(int argc, char *argv[]){
     
     Ipv4AddressHelper address;
     address.SetBase ("10.0.0.0", "255.255.255.0");
+
 
     Ipv4InterfaceContainer sink_interfaces;
 
@@ -525,6 +523,8 @@ int main(int argc, char *argv[]){
 */
   Simulator::Destroy ();
   return 0;
+=======
+
 
     
 
