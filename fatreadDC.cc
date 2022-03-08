@@ -131,27 +131,38 @@ int main(int argc, char *argv[]){
     connections.push_back(NodeContainer (n3d, l7));
     connections.push_back(NodeContainer (n3d, l8));
 
+
+    vector<NetDeviceContainer> devices;
     for(NodeContainer i : connections)
-        pointtopoint.Install(i);
-   
- //   InternetStackHelper internet;
-     
-//    internet.Install (connection_1a_2a);
-//    internet.Install (connection_1a_2b);
-//    internet.Install (connection_1a_2c);
-//
-//    internet.Install (connection_1b_2b);
-//    internet.Install (connection_1b_2c);
-//    internet.Install (connection_1b_2d);
-//
+        devices.push_back(pointtopoint.Install(i));
+ 
+    InternetStackHelper stack;
+    stack.InstallAll ();
+    
+    Ipv4AddressHelper address;
+    address.SetBase ("10.0.0.0", "255.255.255.0");
 
+    vector<Ipv4InterfaceContainer> interfaces;
+        
+    for(NetDeviceContainer i : devices)
+        interfaces.push_back( address.Assign (i) );
 
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  
+    /* 
+    InternetStackHelper stack;
+    stack.InstallAll ();
+    
+    TrafficControlHelper tchPfifo;
+    tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc")
+    
+    TrafficControlHelper tchCoDel;
+    tchCoDel.SetRootQueueDisc ("ns3::CoDelQueueDisc")
+    
+    Ipv4AddressHelper address;
+    address.SetBase ("10.0.0.0", "255.255.255.0");
 
-
-
-
-
-
+*/
 
     
 
