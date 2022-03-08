@@ -182,6 +182,14 @@ TraceNextRx (std::string &next_rx_seq_file_name)
 */
 
 
+static void
+CwndChange (Ptr<OutputStreamWrapper> stream, uint32_t oldCwnd, uint32_t newCwnd)
+{
+  NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t" << newCwnd);
+  *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << oldCwnd << "\t" << newCwnd << std::endl;
+}
+
+
 ///////////////////////////////////////////////////////////////
 //main
 ///////////////////////////////////////////////////////////////
@@ -213,7 +221,7 @@ int main(int argc, char *argv[]){
   cmd.AddValue ("transport_prot", "Transport protocol to use: TcpNewReno, "
                 "TcpHybla, TcpHighSpeed, TcpHtcp, TcpVegas, TcpScalable, TcpVeno, "
                 "TcpBic, TcpYeah, TcpIllinois, TcpWestwood, TcpWestwoodPlus, TcpLedbat, "
-		"TcpLp", transport_prot);
+		        "TcpLp", transport_prot);
   cmd.AddValue ("error_p", "Packet error rate", error_p);
   cmd.AddValue ("bandwidth", "Bottleneck bandwidth", bandwidth);
   cmd.AddValue ("delay", "Bottleneck delay", delay);
@@ -369,8 +377,32 @@ int main(int argc, char *argv[]){
     l6.Create(1);
     l7.Create(1);
     l8.Create(1);
-    
+  /* 
+    n1a.Add(n2c);
+    n1a.Add(n2a);
+    n1b.Add(n2d);
+    n1b.Add(n2b);
+    n2a.Add(n3a);
+    n2a.Add(n3b);
+    n2b.Add(n3a);
+    n2b.Add(n3b);
+    n2c.Add(n3c);
+    n2c.Add(n3d); 
+    n2d.Add(n3c);
+    n2d.Add(n3d); 
+    n3a.Add(l1) ; 
+    n3a.Add(l2);
+    n3b.Add(l3);
+    n3b.Add(l4);
+    n3c.Add(l5);
+    n3c.Add(l6) ;
+    n3d.Add(l7);
+    n3d.Add(l8) ;
+   */ 
 
+
+
+   /*
     vector<NodeContainer> connections;
     
     connections.push_back(NodeContainer (n1a, n2a));    
@@ -397,22 +429,61 @@ int main(int argc, char *argv[]){
     connections.push_back(NodeContainer (n3c, l6));
     connections.push_back(NodeContainer (n3d, l7));
     connections.push_back(NodeContainer (n3d, l8));
-    
+
+(n1a));
+(n1b));
+(n2a));
+(n2b));
+(n2c));
+(n2d));
+(n3a));
+(n3b));
+(n3c));
+(n3d));
+(l1)); 
+(l2)); 
+(l3)); 
+(l4)); 
+(l5)); 
+l(l6));
+(l7)); 
+(l8)); 
+       
+ */   
     
     
 
-  //more traffic control configuration
-  TrafficControlHelper tchPfifo;
-  tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
+    //more traffic control configuration
+    TrafficControlHelper tchPfifo;
+    tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
 
 
 
     vector<NetDeviceContainer> devices;
-    for(NodeContainer i : connections)
-        devices.push_back(pointtopoint.Install(i));
- 
-    InternetStackHelper stack;
-    stack.InstallAll ();
+    devices.push_back(pointtopoint.Install(n1a.Get(0), n2a.Get(0))) ;  
+    devices.push_back(pointtopoint.Install(n1a.Get(0), n2b.Get(0)));
+    devices.push_back(pointtopoint.Install(n1a.Get(0), n2c.Get(0)));
+    devices.push_back(pointtopoint.Install(n1b.Get(0), n2b.Get(0)));
+    devices.push_back(pointtopoint.Install(n1b.Get(0), n2c.Get(0)));
+    devices.push_back(pointtopoint.Install(n1b.Get(0), n2d.Get(0)));
+    devices.push_back(pointtopoint.Install(n2a.Get(0), n3a.Get(0)));
+    devices.push_back(pointtopoint.Install(n2a.Get(0), n3b.Get(0)));
+    devices.push_back(pointtopoint.Install(n2b.Get(0), n3a.Get(0)));
+    devices.push_back(pointtopoint.Install(n2b.Get(0), n3b.Get(0)));
+    devices.push_back(pointtopoint.Install(n2c.Get(0), n3c.Get(0)));
+    devices.push_back(pointtopoint.Install(n2c.Get(0), n3d.Get(0)));
+    devices.push_back(pointtopoint.Install(n2d.Get(0), n3c.Get(0)));
+    devices.push_back(pointtopoint.Install(n2d.Get(0), n3d.Get(0)));
+    devices.push_back(pointtopoint.Install(n3a.Get(0), l1.Get(0)));
+    devices.push_back(pointtopoint.Install(n3a.Get(0), l2.Get(0)));
+    devices.push_back(pointtopoint.Install(n3b.Get(0), l3.Get(0))); 
+    devices.push_back(pointtopoint.Install(n3b.Get(0), l4.Get(0)));
+    devices.push_back(pointtopoint.Install(n3c.Get(0), l5.Get(0)));
+    devices.push_back(pointtopoint.Install(n3c.Get(0), l6.Get(0)));
+    devices.push_back(pointtopoint.Install(n3d.Get(0), l7.Get(0)));     
+    devices.push_back(pointtopoint.Install(n3d.Get(0), l8.Get(0))); 
+    InternetStackHelper stack;                   
+    stack.InstallAll ();                         
     
     Ipv4AddressHelper address;
     address.SetBase ("10.0.0.0", "255.255.255.0");
@@ -452,16 +523,28 @@ int main(int argc, char *argv[]){
     ftp.SetAttribute ("SendSize", UintegerValue (tcp_adu_size));
     ftp.SetAttribute ("MaxBytes", UintegerValue (data_mbytes * 1000000));
 
-    ApplicationContainer sourceApp = ftp.Install (l8);
+    ApplicationContainer sourceApp = ftp.Install (l8.Get (0));
     sourceApp.Start (Seconds (start_time));
     sourceApp.Stop (Seconds (stop_time - 3));
     Address sinkLocalAddress (InetSocketAddress (Ipv4Address::GetAny (), port));
     PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", sinkLocalAddress);
 
     sinkHelper.SetAttribute ("Protocol", TypeIdValue (TcpSocketFactory::GetTypeId ()));
-    ApplicationContainer sinkApp = sinkHelper.Install (l1);
+    ApplicationContainer sinkApp = sinkHelper.Install (l1.Get (0));
     sinkApp.Start (Seconds (start_time));
     sinkApp.Stop (Seconds (stop_time));
+
+
+    //trace stuff
+    Ptr<Socket> ns3TcpSocket = Socket::CreateSocket (l1.Get (0), TcpSocketFactory::GetTypeId ());
+    
+    AsciiTraceHelper asciiTraceHelper;
+    Ptr<OutputStreamWrapper> stream = asciiTraceHelper.CreateFileStream ("tcpReno.cwnd");
+    ns3TcpSocket->TraceConnectWithoutContext ("CongestionWindow", MakeBoundCallback (&CwndChange, stream));
+
+    PcapHelper pcapHelper;
+    Ptr<PcapFileWrapper> file = pcapHelper.CreateFile ("seventh.pcap", std::ios::out, PcapHelper::DLT_PPP);
+
 
 
    
@@ -523,7 +606,6 @@ int main(int argc, char *argv[]){
 */
   Simulator::Destroy ();
   return 0;
-=======
 
 
     
