@@ -182,6 +182,14 @@ TraceNextRx (std::string &next_rx_seq_file_name)
 */
 
 
+static void
+CwndChange (Ptr<OutputStreamWrapper> stream, uint32_t oldCwnd, uint32_t newCwnd)
+{
+  NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t" << newCwnd);
+  *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << oldCwnd << "\t" << newCwnd << std::endl;
+}
+
+
 ///////////////////////////////////////////////////////////////
 //main
 ///////////////////////////////////////////////////////////////
@@ -452,16 +460,28 @@ int main(int argc, char *argv[]){
     ftp.SetAttribute ("SendSize", UintegerValue (tcp_adu_size));
     ftp.SetAttribute ("MaxBytes", UintegerValue (data_mbytes * 1000000));
 
-    ApplicationContainer sourceApp = ftp.Install (l8);
+    ApplicationContainer sourceApp = ftp.Install (l8.Get (0));
     sourceApp.Start (Seconds (start_time));
     sourceApp.Stop (Seconds (stop_time - 3));
     Address sinkLocalAddress (InetSocketAddress (Ipv4Address::GetAny (), port));
     PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", sinkLocalAddress);
 
     sinkHelper.SetAttribute ("Protocol", TypeIdValue (TcpSocketFactory::GetTypeId ()));
-    ApplicationContainer sinkApp = sinkHelper.Install (l1);
+    ApplicationContainer sinkApp = sinkHelper.Install (l1.Get (0));
     sinkApp.Start (Seconds (start_time));
     sinkApp.Stop (Seconds (stop_time));
+
+
+    //trace stuff
+    Ptr<Socket> ns3TcpSocket = Socket::CreateSocket (l1.Get (0), TcpSocketFactory::GetTypeId ());
+    
+    AsciiTraceHelper asciiTraceHelper;
+    Ptr<OutputStreamWrapper> stream = asciiTraceHelper.CreateFileStream ("tcpReno.cwnd");
+    ns3TcpSocket->TraceConnectWithoutContext ("CongestionWindow", MakeBoundCallback (&CwndChange, stream));
+
+    PcapHelper pcapHelper;
+    Ptr<PcapFileWrapper> file = pcapHelper.CreateFile ("seventh.pcap", std::ios::out, PcapHelper::DLT_PPP);
+
 
 
    
@@ -523,7 +543,6 @@ int main(int argc, char *argv[]){
 */
   Simulator::Destroy ();
   return 0;
-=======
 
 
     
