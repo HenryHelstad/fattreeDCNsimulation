@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
     for(NetDeviceContainer i : devices)
         interfaces.push_back( address.Assign (i) );
 
-
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   
     /* 
     InternetStackHelper stack;
