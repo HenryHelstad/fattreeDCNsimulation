@@ -434,11 +434,39 @@ int main(int argc, char *argv[]){
     }
     
     sink_interfaces.Add(interfaces[13]);    
+    
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+    
+    //source inialization
+    
+    Header* temp_header = new Ipv4Header ();
+    uint32_t ip_header = temp_header->GetSerializedSize ();
+    delete temp_header;
+    temp_header = new TcpHeader ();
+    uint32_t tcp_header = temp_header->GetSerializedSize ();
+    delete temp_header;
+    uint32_t tcp_adu_size = mtu_bytes - 20 - (ip_header + tcp_header);
 
-    //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
-    
-    
-    
+    uint16_t port = 50000;
+    AddressValue remoteAddress (InetSocketAddress (sink_interfaces.GetAddress (0, 0), port));
+    Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (tcp_adu_size));
+    BulkSendHelper ftp ("ns3::TcpSocketFactory", Address ());
+    ftp.SetAttribute ("Remote", remoteAddress);
+    ftp.SetAttribute ("SendSize", UintegerValue (tcp_adu_size));
+    ftp.SetAttribute ("MaxBytes", UintegerValue (data_mbytes * 1000000));
+
+    ApplicationContainer sourceApp = ftp.Install (l8);
+    sourceApp.Start (Seconds (start_time));
+    sourceApp.Stop (Seconds (stop_time - 3));
+    Address sinkLocalAddress (InetSocketAddress (Ipv4Address::GetAny (), port));
+    PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", sinkLocalAddress);
+
+    sinkHelper.SetAttribute ("Protocol", TypeIdValue (TcpSocketFactory::GetTypeId ()));
+    ApplicationContainer sinkApp = sinkHelper.Install (l1);
+    sinkApp.Start (Seconds (start_time));
+    sinkApp.Stop (Seconds (stop_time));
+
+
    
  //   InternetStackHelper internet;
      
