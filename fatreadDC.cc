@@ -15,12 +15,36 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/internet-module.h"
+#include "ns3/error-model.h"
+#include "ns3/tcp-header.h"
+#include "ns3/udp-header.h"
+#include "ns3/enum.h"
+#include "ns3/event-id.h"
+#include "ns3/traffic-control-module.h"
 
 using namespace ns3;
 using namespace std;
 
-static const float THROUGHPUT = 100; //idk 
+NS_LOG_COMPONENT_DEFINE ("TcpVariantsComparison");
 
+
+//static bool firstCwnd = true;
+//static bool firstSshThr = true;
+//static bool firstRtt = true;
+//static bool firstRto = true;
+static Ptr<OutputStreamWrapper> ssThreshStream;
+static Ptr<OutputStreamWrapper> cWndStream;
+static Ptr<OutputStreamWrapper> rttStream;
+static Ptr<OutputStreamWrapper> rtoStream;
+static Ptr<OutputStreamWrapper> nextTxStream;
+static Ptr<OutputStreamWrapper> nextRxStream;
+static Ptr<OutputStreamWrapper> inFlightStream;
+//static uint32_t cWndValue;
+//static uint32_t ssThreshValue;
+
+
+static const float THROUGHPUT = 100; //idk 
+/*
 //bunch of helper functions for tracing output
 static void
 CwndTracer (uint32_t oldval, uint32_t newval)
@@ -42,7 +66,7 @@ CwndTracer (uint32_t oldval, uint32_t newval)
 static void
 SsThreshTracer (uint32_t oldval, uint32_t newval)
 {
-  if (firstSshThr)
+    if (firstSshThr)
     {
       *ssThreshStream->GetStream () << "0.0 " << oldval << std::endl;
       firstSshThr = false;
@@ -156,7 +180,7 @@ TraceNextRx (std::string &next_rx_seq_file_name)
   Config::ConnectWithoutContext ("/NodeList/2/$ns3::TcpL4Protocol/SocketList/1/RxBuffer/NextRxSequence", MakeCallback (&NextRxTracer));
 }
 
-
+*/
 
 
 ///////////////////////////////////////////////////////////////
@@ -205,7 +229,7 @@ int main(int argc, char *argv[]){
   cmd.AddValue ("run", "Run index (for setting repeatable seeds)", run);
   cmd.AddValue ("flow_monitor", "Enable flow monitor", flow_monitor);
   cmd.AddValue ("pcap_tracing", "Enable or disable PCAP tracing", pcap);
-  cmd.AddValue ("queue_disc_type", "Queue disc type for gateway (e.g. ns3::CoDelQueueDisc)", squeue_disc_type);
+  cmd.AddValue ("queue_disc_type", "Queue disc type for gateway (e.g. ns3::CoDelQueueDisc)", queue_disc_type);
   cmd.AddValue ("sack", "Enable or disable SACK option", sack);
   cmd.AddValue ("recovery", "Recovery algorithm type to use (e.g., ns3::TcpPrrRecovery", recovery);
   cmd.Parse (argc, argv);
@@ -409,7 +433,7 @@ int main(int argc, char *argv[]){
         address.NewNetwork();
     }
     
-    sink_interfaces.Add(interfaces.Get(13));    
+    sink_interfaces.Add(interfaces[13]);    
 
     //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
     
@@ -429,7 +453,7 @@ int main(int argc, char *argv[]){
 
 
 
-
+/*
 
 
   // Set up tracing if enabled
@@ -453,8 +477,8 @@ int main(int argc, char *argv[]){
 
   if (pcap)
     {
-      UnReLink.EnablePcapAll (prefix_file_name, true);
-      LocalLink.EnablePcapAll (prefix_file_name, true);
+        //UnReLink.EnablePcapAll (prefix_file_name, true);
+      //LocalLink.EnablePcapAll (prefix_file_name, true);
     }
 
   // Flow monitor
@@ -463,18 +487,17 @@ int main(int argc, char *argv[]){
     {
       flowHelper.InstallAll ();
     }
-
+*/
   Simulator::Stop (Seconds (stop_time));
   Simulator::Run ();
-
+/*
   if (flow_monitor)
     {
       flowHelper.SerializeToXmlFile (prefix_file_name + ".flowmonitor", true, true);
     }
-
+*/
   Simulator::Destroy ();
   return 0;
-
 
     
 
