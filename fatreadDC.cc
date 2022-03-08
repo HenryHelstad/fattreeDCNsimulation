@@ -25,7 +25,57 @@ int main(int argc, char *argv[]){
    // Config::SetDefault ("ns3::OnOffApplication::DataRate", StringValue ("448kb/s"));
 
     //initalizing containers and setting up connections
-    NodeContainer n1a, n1b, n2a, n2b, n2c, n2d, n3a, n3b, n3c, n3d;
+    
+    PointToPointHelper pointToPoint;
+    pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
+    pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
+    NetDeviceContainer devices;
+
+    NodeContainer nodes;
+    nodes.Create (18);
+
+    vector<NetDeviceContainer> NETDEVICE;
+    NETDEVICE.reserve(20)
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(0) , NETDEVICE.Get(2) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(0) , NETDEVICE.Get(4) )
+    
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(1) , NETDEVICE.Get(3) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(1) , NETDEVICE.Get(5) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(2) , NETDEVICE.Get(6) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(2) , NETDEVICE.Get(7) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(3) , NETDEVICE.Get(6) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(3) , NETDEVICE.Get(7) )
+ 
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(4) , NETDEVICE.Get(8) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(4) , NETDEVICE.Get(9) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(5) , NETDEVICE.Get(8) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(5) , NETDEVICE.Get(9) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(6) , NETDEVICE.Get(10) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(6) , NETDEVICE.Get(11) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(7) , NETDEVICE.Get(12) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(7) , NETDEVICE.Get(13) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(8) , NETDEVICE.Get(14) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(8) , NETDEVICE.Get(15) )
+
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(2) , NETDEVICE.Get(16) )
+    NETDEVICE.push_back (pointToPoint.Install( NETDEVICE.Get(2) , NETDEVICE.Get(17) )
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+    /*    NodeContainer n1a, n1b, n2a, n2b, n2c, n2d, n3a, n3b, n3c, n3d;
     NodeContainer l1,l2,l3,l4,l5,l6,l7,l8;
     n1a.Create(1);
     n1b.Create(1); 
@@ -77,7 +127,10 @@ int main(int argc, char *argv[]){
     
     NodeContainer connection_3d_l7 = NodeContainer (n3d, l7);
     NodeContainer connection_3d_l8 = NodeContainer (n3d, l8);
+*/
+       
 
+   
  //   InternetStackHelper internet;
      
 //    internet.Install (connection_1a_2a);
