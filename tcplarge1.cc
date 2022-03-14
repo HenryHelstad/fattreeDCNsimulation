@@ -175,9 +175,9 @@ int main (int argc, char *argv[])
   NodeContainer n0n2;
   n0n2.Create(2);
 
-  NodeContainer n1n2;
-  n1n2.Create(1);
-  n1n2.Add(n0n2.Get(1));
+  NodeContainer n2n1;
+  n2n1.Add(n0n2.Get(1));
+  n2n1.Create(1);
 
   NodeContainer n2n6;
   n2n6.Add(n0n2.Get(1));
@@ -286,7 +286,7 @@ int main (int argc, char *argv[])
  
   // And then install devices and channels connecting our topology.
   NetDeviceContainer d0 = p2p.Install (n0n2);
-  NetDeviceContainer d1 = p2p.Install (n1n2);
+  NetDeviceContainer d1 = p2p.Install (n2n1);
   NetDeviceContainer d2 = p2p.Install (n3n5);
   NetDeviceContainer d3 = p2p.Install (n4n5);
   NetDeviceContainer d4 = p2p.Install (n2n6);
@@ -338,9 +338,6 @@ int main (int argc, char *argv[])
  
   // Later, we add IP addresses.
   Ipv4AddressHelper ipv4;
-  ipv4.SetBase ("10.1.0.0", "255.255.255.0");
-  //assign to variable to initite source flow later (main source)
-  Ipv4InterfaceContainer ipInterfs0 = ipv4.Assign (d0);
   ipv4.SetBase ("10.1.1.0", "255.255.255.0");
   //n1 is secondary soruce
   Ipv4InterfaceContainer ipInterfs1 = ipv4.Assign (d1);
@@ -349,7 +346,7 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.3.0", "255.255.255.0");
   ipv4.Assign (d3);
   ipv4.SetBase ("10.1.4.0", "255.255.255.0");
-  ipv4.Assign (d4);
+  Ipv4InterfaceContainer ipInterfs4 = ipv4.Assign (d4);
   ipv4.SetBase ("10.1.5.0", "255.255.255.0");
   ipv4.Assign (d5);
   ipv4.SetBase ("10.1.6.0", "255.255.255.0");
@@ -368,7 +365,7 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.12.0", "255.255.255.0");
   ipv4.Assign (d12);
   ipv4.SetBase ("10.1.13.0", "255.255.255.0");
-  ipv4.Assign (d13);
+  Ipv4InterfaceContainer ipInterfs13 = ipv4.Assign (d13);
   ipv4.SetBase ("10.1.14.0", "255.255.255.0");
   ipv4.Assign (d14);
   ipv4.SetBase ("10.1.15.0", "255.255.255.0");
@@ -381,6 +378,10 @@ int main (int argc, char *argv[])
   ipv4.Assign (d18);
   ipv4.SetBase ("10.1.19.0", "255.255.255.0");
   ipv4.Assign (d19);
+
+  ipv4.SetBase ("10.1.0.0", "255.255.255.0");
+  //assign to variable to initite source flow later (main source)
+  Ipv4InterfaceContainer ipInterfs0 = ipv4.Assign (d0);
   //end of right half link IP addresses
 
   //////////////////////////////////////////////////////////////
@@ -417,7 +418,7 @@ int main (int argc, char *argv[])
   PacketSinkHelper sink0 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort0));
  
-  ApplicationContainer apps0 = sink0.Install (n1n2.Get(0));
+  ApplicationContainer apps0 = sink0.Install (n12n13.Get(0));
   apps0.Start (Seconds (0.0));
   apps0.Stop (Seconds (100.0));
  
@@ -461,7 +462,7 @@ int main (int argc, char *argv[])
 
   //MAIN SOURCE n0
   Simulator::ScheduleNow (&StartFlow, localSocket0,
-                          ipInterfs0.GetAddress (1), servPort0);
+                          ipInterfs13.GetAddress (1), servPort0);
 
   //secondary source n1
   /*Simulator::ScheduleNow (&StartFlow, localSocket1,
