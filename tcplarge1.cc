@@ -73,6 +73,8 @@ static uint32_t currentTxBytes = 0;
 // we want to detect data splicing in the output stream)
 static const uint32_t writeSize = 1040;
 uint8_t data[writeSize];
+
+int runtime = 100;
  
 // These are for starting the writing process, and handling the sending 
 // socket's notification upcalls (events).  These two together more or less
@@ -175,31 +177,32 @@ int main (int argc, char *argv[])
   NodeContainer n0n2;
   n0n2.Create(2);
 
-  NodeContainer n1n2;
-  n1n2.Create(1);
-  n1n2.Add(n0n2.Get(1));
-
-  NodeContainer n3n5;
-  n3n5.Create(2);
-
-  NodeContainer n4n5;
-  n4n5.Create(1);
-  n4n5.Add(n3n5.Get(1));
+  NodeContainer n2n1;
+  n2n1.Add(n0n2.Get(1));
+  n2n1.Create(1);
 
   NodeContainer n2n6;
   n2n6.Add(n0n2.Get(1));
   n2n6.Create(1);
 
+  NodeContainer n5n6;
+  n5n6.Add(n2n6.Get(1));
+  n5n6.Create(1);
+
+  NodeContainer n3n5;
+  n3n5.Add(n5n6.Get(0));
+  n3n5.Create(1);
+
+  NodeContainer n4n5;
+  n4n5.Add(n5n6.Get(0));
+  n4n5.Create(1);
+
   NodeContainer n2n7;
   n2n7.Add(n0n2.Get(1));
   n2n7.Create(1);
-
-  NodeContainer n5n6;
-  n5n6.Add(n3n5.Get(1));
-  n5n6.Add(n2n6.Get(1));
   
   NodeContainer n5n7;
-  n5n7.Add(n3n5.Get(1));
+  n5n7.Add(n5n6.Get(0));
   n5n7.Add(n2n7.Get(1));
 
   NodeContainer n6n16;
@@ -212,43 +215,47 @@ int main (int argc, char *argv[])
 
   // END of left half of links
 
-  NodeContainer n8n10;
-  n8n10.Create(2);
-
-  NodeContainer n9n10;
-  n9n10.Create(1);
-  n9n10.Add(n8n10.Get(1));
-
-  NodeContainer n11n13;
-  n11n13.Create(2);
-
-  NodeContainer n12n13;
-  n12n13.Create(1);
-  n12n13.Add(n11n13.Get(1));
-
-  NodeContainer n10n14;
-  n10n14.Add(n8n10.Get(1));
-  n10n14.Create(1);
-
-  NodeContainer n10n15;
-  n10n15.Add(n8n10.Get(1));
-  n10n15.Create(1);
-
-  NodeContainer n13n14;
-  n13n14.Add(n11n13.Get(1));
-  n13n14.Add(n10n14.Get(1));
-
-  NodeContainer n13n15;
-  n13n15.Add(n11n13.Get(1));
-  n13n15.Add(n10n15.Get(1));
-
   NodeContainer n14n16;
-  n14n16.Add(n10n14.Get(1));
   n14n16.Add(n6n16.Get(1));
+  n14n16.Create(1);
 
   NodeContainer n15n17;
-  n15n17.Add(n10n15.Get(1));
   n15n17.Add(n7n17.Get(1));
+  n15n17.Create(1);
+
+  NodeContainer n10n14;
+  n10n14.Add(n14n16.Get(0));
+  n10n14.Create(1);
+
+  NodeContainer n8n10;
+  n8n10.Add(n10n14.Get(0));
+  n8n10.Create(1);
+
+  NodeContainer n9n10;
+  n9n10.Add(n10n14.Get(0));
+  n9n10.Create(1);
+
+  NodeContainer n13n15;
+  n13n15.Add(n15n17.Get(0));
+  n13n15.Create(1);
+
+  NodeContainer n11n13;
+  n11n13.Add(n13n15.Get(0));
+  n11n13.Create(1);
+
+  NodeContainer n12n13;
+  n12n13.Add(n13n15.Get(0));
+  n12n13.Create(1);
+
+  NodeContainer n10n15;
+  n10n15.Add(n10n14.Get(0));
+  n10n15.Add(n15n17.Get(0));
+
+  NodeContainer n13n14;
+  n13n14.Add(n13n15.Get(0));
+  n13n14.Add(n14n16.Get(0));
+
+
 
   //END of right half of links
 
@@ -267,7 +274,7 @@ int main (int argc, char *argv[])
   RateErrorModel error_model;
   error_model.SetRandomVariable (uv);
   error_model.SetUnit (RateErrorModel::ERROR_UNIT_PACKET);
-  error_model.SetRate (.005);
+  error_model.SetRate (.01);
  
   ////////////////////////////////////////////////////////////////
   //Setting up point to point helper for each link
@@ -283,7 +290,7 @@ int main (int argc, char *argv[])
  
   // And then install devices and channels connecting our topology.
   NetDeviceContainer d0 = p2p.Install (n0n2);
-  NetDeviceContainer d1 = p2p.Install (n1n2);
+  NetDeviceContainer d1 = p2p.Install (n2n1);
   NetDeviceContainer d2 = p2p.Install (n3n5);
   NetDeviceContainer d3 = p2p.Install (n4n5);
   NetDeviceContainer d4 = p2p.Install (n2n6);
@@ -335,9 +342,6 @@ int main (int argc, char *argv[])
  
   // Later, we add IP addresses.
   Ipv4AddressHelper ipv4;
-  ipv4.SetBase ("10.1.0.0", "255.255.255.0");
-  //assign to variable to initite source flow later (main source)
-  Ipv4InterfaceContainer ipInterfs0 = ipv4.Assign (d0);
   ipv4.SetBase ("10.1.1.0", "255.255.255.0");
   //n1 is secondary soruce
   Ipv4InterfaceContainer ipInterfs1 = ipv4.Assign (d1);
@@ -346,7 +350,7 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.3.0", "255.255.255.0");
   ipv4.Assign (d3);
   ipv4.SetBase ("10.1.4.0", "255.255.255.0");
-  ipv4.Assign (d4);
+  Ipv4InterfaceContainer ipInterfs4 = ipv4.Assign (d4);
   ipv4.SetBase ("10.1.5.0", "255.255.255.0");
   ipv4.Assign (d5);
   ipv4.SetBase ("10.1.6.0", "255.255.255.0");
@@ -359,13 +363,13 @@ int main (int argc, char *argv[])
   ipv4.Assign (d9);
   //end of left link IP addresses 
   ipv4.SetBase ("10.1.10.0", "255.255.255.0");
-  ipv4.Assign (d10);
+  Ipv4InterfaceContainer ipInterfs10 = ipv4.Assign (d10);
   ipv4.SetBase ("10.1.11.0", "255.255.255.0");
-  ipv4.Assign (d11);
+  Ipv4InterfaceContainer ipInterfs11 = ipv4.Assign (d11);
   ipv4.SetBase ("10.1.12.0", "255.255.255.0");
-  ipv4.Assign (d12);
+  Ipv4InterfaceContainer ipInterfs12 = ipv4.Assign (d12);
   ipv4.SetBase ("10.1.13.0", "255.255.255.0");
-  ipv4.Assign (d13);
+  Ipv4InterfaceContainer ipInterfs13 = ipv4.Assign (d13);
   ipv4.SetBase ("10.1.14.0", "255.255.255.0");
   ipv4.Assign (d14);
   ipv4.SetBase ("10.1.15.0", "255.255.255.0");
@@ -375,9 +379,13 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.17.0", "255.255.255.0");
   ipv4.Assign (d17);
   ipv4.SetBase ("10.1.18.0", "255.255.255.0");
-  ipv4.Assign (d18);
+  Ipv4InterfaceContainer ipInterfs18 = ipv4.Assign (d18);
   ipv4.SetBase ("10.1.19.0", "255.255.255.0");
   ipv4.Assign (d19);
+
+  ipv4.SetBase ("10.1.0.0", "255.255.255.0");
+  //assign to variable to initite source flow later (main source)
+  Ipv4InterfaceContainer ipInterfs0 = ipv4.Assign (d0);
   //end of right half link IP addresses
 
   //////////////////////////////////////////////////////////////
@@ -408,22 +416,34 @@ int main (int argc, char *argv[])
   ////////////////////////////////////////////////////////////////////////
 
   uint16_t servPort0 = 50000;
-  uint16_t servPort1 = 50001;
+  uint16_t servPort1 = 50000;
  
   // Create a packet sink to receive these packets on n12...
   PacketSinkHelper sink0 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort0));
  
-  ApplicationContainer apps0 = sink0.Install (n12n13.Get(0));
+  ApplicationContainer apps0 = sink0.Install (n12n13.Get(1));
   apps0.Start (Seconds (0.0));
-  apps0.Stop (Seconds (100.0));
+  apps0.Stop (Seconds (runtime));
  
   //second sink on n11
   PacketSinkHelper sink1 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort1));
-  ApplicationContainer apps1 = sink1.Install (n11n13.Get(0));
+  ApplicationContainer apps1 = sink1.Install (n11n13.Get(1));
   apps1.Start (Seconds (0.0));
-  apps1.Stop (Seconds (100.0));                 
+  apps1.Stop (Seconds (runtime));      
+
+  PacketSinkHelper sink2 ("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny (), servPort1));
+  ApplicationContainer apps2 = sink2.Install (n8n10.Get(1));
+  apps2.Start (Seconds (0.0));
+  apps2.Stop (Seconds (runtime));  
+
+  PacketSinkHelper sink3 ("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny (), servPort1));
+  ApplicationContainer apps3 = sink3.Install (n9n10.Get(1));
+  apps3.Start (Seconds (0.0));
+  apps3.Stop (Seconds (runtime));     
  
   ////////////////////////////////////////////////////////////////////////
   //END OF SINK SETUP
@@ -446,8 +466,16 @@ int main (int argc, char *argv[])
 
   //create socket for secondary source on n1
   Ptr<Socket> localSocket1 =
-    Socket::CreateSocket (n1n2.Get (0), TcpSocketFactory::GetTypeId ());
+    Socket::CreateSocket (n2n1.Get (1), TcpSocketFactory::GetTypeId ());
   localSocket1->Bind ();
+
+  Ptr<Socket> localSocket2 =
+    Socket::CreateSocket (n3n5.Get (1), TcpSocketFactory::GetTypeId ());
+  localSocket2->Bind ();
+
+  Ptr<Socket> localSocket3 =
+    Socket::CreateSocket (n4n5.Get (1), TcpSocketFactory::GetTypeId ());
+  localSocket3->Bind ();
  
   // Trace changes to the congestion window
   //DO NOT NEED
@@ -458,11 +486,17 @@ int main (int argc, char *argv[])
 
   //MAIN SOURCE n0
   Simulator::ScheduleNow (&StartFlow, localSocket0,
-                          ipInterfs0.GetAddress (1), servPort0);
+                          ipInterfs13.GetAddress (1), servPort0);
 
   //secondary source n1
   Simulator::ScheduleNow (&StartFlow, localSocket1,
-                          ipInterfs1.GetAddress (1), servPort1);
+                          ipInterfs10.GetAddress (1), servPort1);
+
+  Simulator::ScheduleNow (&StartFlow, localSocket2,
+                          ipInterfs12.GetAddress (1), servPort1);
+
+  Simulator::ScheduleNow (&StartFlow, localSocket3,
+                          ipInterfs11.GetAddress (1), servPort1);
  
   // One can toggle the comment for the following line on or off to see the
   // effects of finite send buffer modelling.  One can also change the size of
@@ -486,7 +520,7 @@ int main (int argc, char *argv[])
  
   // Finally, set up the simulator to run.  The 1000 second hard limit is a
   // failsafe in case some change above causes the simulation to never end
-  Simulator::Stop (Seconds (100));
+  Simulator::Stop (Seconds (runtime));
   Simulator::Run ();
   Simulator::Destroy ();
 }
@@ -511,14 +545,17 @@ void StartFlow (Ptr<Socket> localSocket,
  
 void WriteUntilBufferFull (Ptr<Socket> localSocket, uint32_t txSpace)
 {
+  //std::cout << "txspace: " << txSpace << std::endl;
   while (currentTxBytes < totalTxBytes && localSocket->GetTxAvailable () > 0) 
     {
+      //print out size of stuff to test
       uint32_t left = totalTxBytes - currentTxBytes;
       uint32_t dataOffset = currentTxBytes % writeSize;
       uint32_t toWrite = writeSize - dataOffset;
       toWrite = std::min (toWrite, left);
       toWrite = std::min (toWrite, localSocket->GetTxAvailable ());
       int amountSent = localSocket->Send (&data[dataOffset], toWrite, 0);
+      //std::cout << "amount sent: " << amountSent << std::endl;
       if(amountSent < 0)
         {
           // we will be called again when new tx space becomes available.
