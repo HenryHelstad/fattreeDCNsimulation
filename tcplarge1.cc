@@ -73,6 +73,8 @@ static uint32_t currentTxBytes = 0;
 // we want to detect data splicing in the output stream)
 static const uint32_t writeSize = 1040;
 uint8_t data[writeSize];
+
+int runtime = 100;
  
 // These are for starting the writing process, and handling the sending 
 // socket's notification upcalls (events).  These two together more or less
@@ -363,7 +365,7 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.11.0", "255.255.255.0");
   ipv4.Assign (d11);
   ipv4.SetBase ("10.1.12.0", "255.255.255.0");
-  ipv4.Assign (d12);
+  Ipv4InterfaceContainer ipInterfs12 = ipv4.Assign (d12);
   ipv4.SetBase ("10.1.13.0", "255.255.255.0");
   Ipv4InterfaceContainer ipInterfs13 = ipv4.Assign (d13);
   ipv4.SetBase ("10.1.14.0", "255.255.255.0");
@@ -412,7 +414,7 @@ int main (int argc, char *argv[])
   ////////////////////////////////////////////////////////////////////////
 
   uint16_t servPort0 = 50000;
-  //uint16_t servPort1 = 50001;
+  uint16_t servPort1 = 50001;
  
   // Create a packet sink to receive these packets on n12...
   PacketSinkHelper sink0 ("ns3::TcpSocketFactory",
@@ -420,14 +422,14 @@ int main (int argc, char *argv[])
  
   ApplicationContainer apps0 = sink0.Install (n12n13.Get(0));
   apps0.Start (Seconds (0.0));
-  apps0.Stop (Seconds (100.0));
+  apps0.Stop (Seconds (runtime));
  
   //second sink on n11
-  /*PacketSinkHelper sink1 ("ns3::TcpSocketFactory",
+  PacketSinkHelper sink1 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort1));
   ApplicationContainer apps1 = sink1.Install (n11n13.Get(0));
   apps1.Start (Seconds (0.0));
-  apps1.Stop (Seconds (100.0));*/                 
+  apps1.Stop (Seconds (runtime));                
  
   ////////////////////////////////////////////////////////////////////////
   //END OF SINK SETUP
@@ -449,9 +451,9 @@ int main (int argc, char *argv[])
   localSocket0->Bind ();
 
   //create socket for secondary source on n1
-  /*Ptr<Socket> localSocket1 =
-    Socket::CreateSocket (n1n2.Get (0), TcpSocketFactory::GetTypeId ());
-  localSocket1->Bind ();*/
+  Ptr<Socket> localSocket1 =
+    Socket::CreateSocket (n2n1.Get (1), TcpSocketFactory::GetTypeId ());
+  localSocket1->Bind ();
  
   // Trace changes to the congestion window
   //DO NOT NEED
@@ -465,8 +467,8 @@ int main (int argc, char *argv[])
                           ipInterfs13.GetAddress (1), servPort0);
 
   //secondary source n1
-  /*Simulator::ScheduleNow (&StartFlow, localSocket1,
-                          ipInterfs1.GetAddress (1), servPort1);*/
+  Simulator::ScheduleNow (&StartFlow, localSocket1,
+                          ipInterfs12.GetAddress (1), servPort1);
  
   // One can toggle the comment for the following line on or off to see the
   // effects of finite send buffer modelling.  One can also change the size of
@@ -490,7 +492,7 @@ int main (int argc, char *argv[])
  
   // Finally, set up the simulator to run.  The 1000 second hard limit is a
   // failsafe in case some change above causes the simulation to never end
-  Simulator::Stop (Seconds (100));
+  Simulator::Stop (Seconds (runtime));
   Simulator::Run ();
   Simulator::Destroy ();
 }
