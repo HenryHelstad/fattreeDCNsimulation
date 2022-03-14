@@ -186,16 +186,16 @@ int main (int argc, char *argv[])
   n2n6.Create(1);
 
   NodeContainer n5n6;
-  n5n6.Create(1);
   n5n6.Add(n2n6.Get(1));
+  n5n6.Create(1);
 
   NodeContainer n3n5;
-  n3n5.Create(1);
   n3n5.Add(n5n6.Get(0));
+  n3n5.Create(1);
 
   NodeContainer n4n5;
-  n4n5.Create(1);
   n4n5.Add(n5n6.Get(0));
+  n4n5.Create(1);
 
   NodeContainer n2n7;
   n2n7.Add(n0n2.Get(1));
@@ -216,36 +216,36 @@ int main (int argc, char *argv[])
   // END of left half of links
 
   NodeContainer n14n16;
-  n14n16.Create(1);
   n14n16.Add(n6n16.Get(1));
+  n14n16.Create(1);
 
   NodeContainer n15n17;
-  n15n17.Create(1);
   n15n17.Add(n7n17.Get(1));
+  n15n17.Create(1);
 
   NodeContainer n10n14;
-  n10n14.Create(1);
   n10n14.Add(n14n16.Get(0));
+  n10n14.Create(1);
 
   NodeContainer n8n10;
-  n8n10.Create(1);
   n8n10.Add(n10n14.Get(0));
+  n8n10.Create(1);
 
   NodeContainer n9n10;
-  n9n10.Create(1);
   n9n10.Add(n10n14.Get(0));
+  n9n10.Create(1);
 
   NodeContainer n13n15;
-  n13n15.Create(1);
   n13n15.Add(n15n17.Get(0));
+  n13n15.Create(1);
 
   NodeContainer n11n13;
-  n11n13.Create(1);
   n11n13.Add(n13n15.Get(0));
+  n11n13.Create(1);
 
   NodeContainer n12n13;
-  n12n13.Create(1);
   n12n13.Add(n13n15.Get(0));
+  n12n13.Create(1);
 
   NodeContainer n10n15;
   n10n15.Add(n10n14.Get(0));
@@ -254,6 +254,8 @@ int main (int argc, char *argv[])
   NodeContainer n13n14;
   n13n14.Add(n13n15.Get(0));
   n13n14.Add(n14n16.Get(0));
+
+
 
   //END of right half of links
 
@@ -272,7 +274,7 @@ int main (int argc, char *argv[])
   RateErrorModel error_model;
   error_model.SetRandomVariable (uv);
   error_model.SetUnit (RateErrorModel::ERROR_UNIT_PACKET);
-  error_model.SetRate (.005);
+  error_model.SetRate (.01);
  
   ////////////////////////////////////////////////////////////////
   //Setting up point to point helper for each link
@@ -361,9 +363,9 @@ int main (int argc, char *argv[])
   ipv4.Assign (d9);
   //end of left link IP addresses 
   ipv4.SetBase ("10.1.10.0", "255.255.255.0");
-  ipv4.Assign (d10);
+  Ipv4InterfaceContainer ipInterfs10 = ipv4.Assign (d10);
   ipv4.SetBase ("10.1.11.0", "255.255.255.0");
-  ipv4.Assign (d11);
+  Ipv4InterfaceContainer ipInterfs11 = ipv4.Assign (d11);
   ipv4.SetBase ("10.1.12.0", "255.255.255.0");
   Ipv4InterfaceContainer ipInterfs12 = ipv4.Assign (d12);
   ipv4.SetBase ("10.1.13.0", "255.255.255.0");
@@ -377,7 +379,7 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.17.0", "255.255.255.0");
   ipv4.Assign (d17);
   ipv4.SetBase ("10.1.18.0", "255.255.255.0");
-  ipv4.Assign (d18);
+  Ipv4InterfaceContainer ipInterfs18 = ipv4.Assign (d18);
   ipv4.SetBase ("10.1.19.0", "255.255.255.0");
   ipv4.Assign (d19);
 
@@ -414,22 +416,34 @@ int main (int argc, char *argv[])
   ////////////////////////////////////////////////////////////////////////
 
   uint16_t servPort0 = 50000;
-  uint16_t servPort1 = 50001;
+  uint16_t servPort1 = 50000;
  
   // Create a packet sink to receive these packets on n12...
   PacketSinkHelper sink0 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort0));
  
-  ApplicationContainer apps0 = sink0.Install (n12n13.Get(0));
+  ApplicationContainer apps0 = sink0.Install (n12n13.Get(1));
   apps0.Start (Seconds (0.0));
   apps0.Stop (Seconds (runtime));
  
   //second sink on n11
   PacketSinkHelper sink1 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort1));
-  ApplicationContainer apps1 = sink1.Install (n11n13.Get(0));
+  ApplicationContainer apps1 = sink1.Install (n11n13.Get(1));
   apps1.Start (Seconds (0.0));
-  apps1.Stop (Seconds (runtime));                
+  apps1.Stop (Seconds (runtime));      
+
+  PacketSinkHelper sink2 ("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny (), servPort1));
+  ApplicationContainer apps2 = sink2.Install (n8n10.Get(1));
+  apps2.Start (Seconds (0.0));
+  apps2.Stop (Seconds (runtime));  
+
+  PacketSinkHelper sink3 ("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny (), servPort1));
+  ApplicationContainer apps3 = sink3.Install (n9n10.Get(1));
+  apps3.Start (Seconds (0.0));
+  apps3.Stop (Seconds (runtime));     
  
   ////////////////////////////////////////////////////////////////////////
   //END OF SINK SETUP
@@ -454,6 +468,14 @@ int main (int argc, char *argv[])
   Ptr<Socket> localSocket1 =
     Socket::CreateSocket (n2n1.Get (1), TcpSocketFactory::GetTypeId ());
   localSocket1->Bind ();
+
+  Ptr<Socket> localSocket2 =
+    Socket::CreateSocket (n3n5.Get (1), TcpSocketFactory::GetTypeId ());
+  localSocket2->Bind ();
+
+  Ptr<Socket> localSocket3 =
+    Socket::CreateSocket (n4n5.Get (1), TcpSocketFactory::GetTypeId ());
+  localSocket3->Bind ();
  
   // Trace changes to the congestion window
   //DO NOT NEED
@@ -468,7 +490,13 @@ int main (int argc, char *argv[])
 
   //secondary source n1
   Simulator::ScheduleNow (&StartFlow, localSocket1,
+                          ipInterfs10.GetAddress (1), servPort1);
+
+  Simulator::ScheduleNow (&StartFlow, localSocket2,
                           ipInterfs12.GetAddress (1), servPort1);
+
+  Simulator::ScheduleNow (&StartFlow, localSocket3,
+                          ipInterfs11.GetAddress (1), servPort1);
  
   // One can toggle the comment for the following line on or off to see the
   // effects of finite send buffer modelling.  One can also change the size of
@@ -517,14 +545,17 @@ void StartFlow (Ptr<Socket> localSocket,
  
 void WriteUntilBufferFull (Ptr<Socket> localSocket, uint32_t txSpace)
 {
+  //std::cout << "txspace: " << txSpace << std::endl;
   while (currentTxBytes < totalTxBytes && localSocket->GetTxAvailable () > 0) 
     {
+      //print out size of stuff to test
       uint32_t left = totalTxBytes - currentTxBytes;
       uint32_t dataOffset = currentTxBytes % writeSize;
       uint32_t toWrite = writeSize - dataOffset;
       toWrite = std::min (toWrite, left);
       toWrite = std::min (toWrite, localSocket->GetTxAvailable ());
       int amountSent = localSocket->Send (&data[dataOffset], toWrite, 0);
+      //std::cout << "amount sent: " << amountSent << std::endl;
       if(amountSent < 0)
         {
           // we will be called again when new tx space becomes available.
