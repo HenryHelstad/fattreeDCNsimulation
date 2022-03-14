@@ -179,27 +179,28 @@ int main (int argc, char *argv[])
   n1n2.Create(1);
   n1n2.Add(n0n2.Get(1));
 
-  NodeContainer n3n5;
-  n3n5.Create(2);
-
-  NodeContainer n4n5;
-  n4n5.Create(1);
-  n4n5.Add(n3n5.Get(1));
-
   NodeContainer n2n6;
   n2n6.Add(n0n2.Get(1));
   n2n6.Create(1);
 
+  NodeContainer n5n6;
+  n5n6.Create(1);
+  n5n6.Add(n2n6.Get(1));
+
+  NodeContainer n3n5;
+  n3n5.Create(1);
+  n3n5.Add(n5n6.Get(0));
+
+  NodeContainer n4n5;
+  n4n5.Create(1);
+  n4n5.Add(n5n6.Get(0));
+
   NodeContainer n2n7;
   n2n7.Add(n0n2.Get(1));
   n2n7.Create(1);
-
-  NodeContainer n5n6;
-  n5n6.Add(n3n5.Get(1));
-  n5n6.Add(n2n6.Get(1));
   
   NodeContainer n5n7;
-  n5n7.Add(n3n5.Get(1));
+  n5n7.Add(n5n6.Get(0));
   n5n7.Add(n2n7.Get(1));
 
   NodeContainer n6n16;
@@ -212,43 +213,45 @@ int main (int argc, char *argv[])
 
   // END of left half of links
 
-  NodeContainer n8n10;
-  n8n10.Create(2);
-
-  NodeContainer n9n10;
-  n9n10.Create(1);
-  n9n10.Add(n8n10.Get(1));
-
-  NodeContainer n11n13;
-  n11n13.Create(2);
-
-  NodeContainer n12n13;
-  n12n13.Create(1);
-  n12n13.Add(n11n13.Get(1));
-
-  NodeContainer n10n14;
-  n10n14.Add(n8n10.Get(1));
-  n10n14.Create(1);
-
-  NodeContainer n10n15;
-  n10n15.Add(n8n10.Get(1));
-  n10n15.Create(1);
-
-  NodeContainer n13n14;
-  n13n14.Add(n11n13.Get(1));
-  n13n14.Add(n10n14.Get(1));
-
-  NodeContainer n13n15;
-  n13n15.Add(n11n13.Get(1));
-  n13n15.Add(n10n15.Get(1));
-
   NodeContainer n14n16;
-  n14n16.Add(n10n14.Get(1));
+  n14n16.Create(1);
   n14n16.Add(n6n16.Get(1));
 
   NodeContainer n15n17;
-  n15n17.Add(n10n15.Get(1));
+  n15n17.Create(1);
   n15n17.Add(n7n17.Get(1));
+
+  NodeContainer n10n14;
+  n10n14.Create(1);
+  n10n14.Add(n14n16.Get(0));
+
+  NodeContainer n8n10;
+  n8n10.Create(1);
+  n8n10.Add(n10n14.Get(0));
+
+  NodeContainer n9n10;
+  n9n10.Create(1);
+  n9n10.Add(n10n14.Get(0));
+
+  NodeContainer n13n15;
+  n13n15.Create(1);
+  n13n15.Add(n15n17.Get(0));
+
+  NodeContainer n11n13;
+  n11n13.Create(1);
+  n11n13.Add(n13n15.Get(0));
+
+  NodeContainer n12n13;
+  n12n13.Create(1);
+  n12n13.Add(n13n15.Get(0));
+
+  NodeContainer n10n15;
+  n10n15.Add(n10n14.Get(0));
+  n10n15.Add(n15n17.Get(0));
+
+  NodeContainer n13n14;
+  n13n14.Add(n13n15.Get(0));
+  n13n14.Add(n14n16.Get(0));
 
   //END of right half of links
 
@@ -408,22 +411,22 @@ int main (int argc, char *argv[])
   ////////////////////////////////////////////////////////////////////////
 
   uint16_t servPort0 = 50000;
-  uint16_t servPort1 = 50001;
+  //uint16_t servPort1 = 50001;
  
   // Create a packet sink to receive these packets on n12...
   PacketSinkHelper sink0 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort0));
  
-  ApplicationContainer apps0 = sink0.Install (n12n13.Get(0));
+  ApplicationContainer apps0 = sink0.Install (n1n2.Get(0));
   apps0.Start (Seconds (0.0));
   apps0.Stop (Seconds (100.0));
  
   //second sink on n11
-  PacketSinkHelper sink1 ("ns3::TcpSocketFactory",
+  /*PacketSinkHelper sink1 ("ns3::TcpSocketFactory",
                          InetSocketAddress (Ipv4Address::GetAny (), servPort1));
   ApplicationContainer apps1 = sink1.Install (n11n13.Get(0));
   apps1.Start (Seconds (0.0));
-  apps1.Stop (Seconds (100.0));                 
+  apps1.Stop (Seconds (100.0));*/                 
  
   ////////////////////////////////////////////////////////////////////////
   //END OF SINK SETUP
@@ -445,9 +448,9 @@ int main (int argc, char *argv[])
   localSocket0->Bind ();
 
   //create socket for secondary source on n1
-  Ptr<Socket> localSocket1 =
+  /*Ptr<Socket> localSocket1 =
     Socket::CreateSocket (n1n2.Get (0), TcpSocketFactory::GetTypeId ());
-  localSocket1->Bind ();
+  localSocket1->Bind ();*/
  
   // Trace changes to the congestion window
   //DO NOT NEED
@@ -461,8 +464,8 @@ int main (int argc, char *argv[])
                           ipInterfs0.GetAddress (1), servPort0);
 
   //secondary source n1
-  Simulator::ScheduleNow (&StartFlow, localSocket1,
-                          ipInterfs1.GetAddress (1), servPort1);
+  /*Simulator::ScheduleNow (&StartFlow, localSocket1,
+                          ipInterfs1.GetAddress (1), servPort1);*/
  
   // One can toggle the comment for the following line on or off to see the
   // effects of finite send buffer modelling.  One can also change the size of
